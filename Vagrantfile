@@ -6,8 +6,8 @@ Vagrant.configure("2") do |config|
 	sudo sed -e '/^.*ubuntu-bionic.*/d' -i /etc/hosts
 	sudo sed -i -e 's/#DNS=/DNS=8.8.8.8/' /etc/systemd/resolved.conf
 	echo "192.168.33.13 master" | sudo tee --append /etc/hosts
-    echo "192.168.33.14 worker-1" | sudo tee --append /etc/hosts
-    echo "192.168.33.15 worker-2" | sudo tee --append /etc/hosts
+    echo "192.168.33.14 worker-14" | sudo tee --append /etc/hosts
+    echo "192.168.33.15 worker-15" | sudo tee --append /etc/hosts
 	sudo apt-get update
     sudo apt-get install containerd -y
 	sudo mkdir -p /etc/containerd
@@ -33,35 +33,49 @@ Vagrant.configure("2") do |config|
   w.vm.hostname = "master"
   w.vm.network "private_network", ip: "192.168.33.13"
   w.vm.provider "virtualbox" do |vb|
-    vb.memory = "4096"
+    vb.memory = "6144"
     vb.cpus = 2
     vb.name = "master"
   end
+  #sudo kubeadm init --apiserver-advertise-address 192.168.33.13 --pod-network-cidr=10.244.0.0/16
   #mkdir -p /home/vagrant/.kube
   #sudo cp /etc/kubernetes/admin.conf /home/vagrant/.kube/config
   #sudo chown vagrant:vagrant /home/vagrant/.kube/config
   #kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
   end
 
-  config.vm.box = "ubuntu/jammy64"
-  config.vm.define "worker-1" do | w |
-  w.vm.hostname = "worker-1"
-  w.vm.network "private_network", ip: "192.168.33.14"
-  w.vm.provider "virtualbox" do |vb|
+(14..15).each do |i|
+  config.vm.define "worker-#{i}" do |node|
+  node.vm.hostname = "worker-#{i}"
+  node.vm.network "private_network", ip: "192.168.33.#{i}"
+  node.vm.provider "virtualbox" do |vb|
 	vb.memory = "2048"
 	vb.cpus = 2
-	vb.name = "worker-1"
+	vb.name = "worker-#{i}"
   end
+  end
+  #kubeadm token create --print-join-command
   end
 
-  config.vm.box = "ubuntu/jammy64"
-  config.vm.define "worker-2" do | w |
-  w.vm.hostname = "worker-2"
-  w.vm.network "private_network", ip: "192.168.33.15"
-  w.vm.provider "virtualbox" do |vb|
-	vb.memory = "2048"
-	vb.cpus = 2
-	vb.name = "worker-2"
-  end
-  end
+#  config.vm.box = "ubuntu/jammy64"
+#  config.vm.define "worker-1" do | w |
+#  w.vm.hostname = "worker-1"
+#  w.vm.network "private_network", ip: "192.168.33.14"
+#  w.vm.provider "virtualbox" do |vb|
+#	vb.memory = "2048"
+#	vb.cpus = 2
+#	vb.name = "worker-1"
+#  end
+#  end
+
+#  config.vm.box = "ubuntu/jammy64"
+#  config.vm.define "worker-2" do | w |
+#  w.vm.hostname = "worker-2"
+#  w.vm.network "private_network", ip: "192.168.33.15"
+#  w.vm.provider "virtualbox" do |vb|
+#	vb.memory = "2048"
+#	vb.cpus = 2
+#	vb.name = "worker-2"
+#  end
+#  end
 end
