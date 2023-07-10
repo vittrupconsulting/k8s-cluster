@@ -37,6 +37,10 @@ Vagrant.configure("2") do |config|
     vb.cpus = 2
     vb.name = "master"
   end
+  #mkdir -p /home/vagrant/.kube
+  #sudo cp /etc/kubernetes/admin.conf /home/vagrant/.kube/config
+  #sudo chown vagrant:vagrant /home/vagrant/.kube/config
+  #kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
   end
 
   config.vm.box = "ubuntu/jammy64"
