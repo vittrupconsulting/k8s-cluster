@@ -79,12 +79,16 @@ Vagrant.configure("2") do |config|
     ansible.vm.provision "shell", inline: <<-SHELL
       cp /vagrant/id_rsa /home/vagrant/.ssh/id_rsa
       chmod 600 /home/vagrant/.ssh/id_rsa
+      sudo chown vagrant:vagrant /home/vagrant/.ssh/id_rsa
       sudo apt-get update
       sudo apt-get install --yes python3-pip
       pip install ansible
     SHELL
     ansible.vm.provision "shell", inline: <<-SHELL
       export ANSIBLE_HOST_KEY_CHECKING=False
+      ansible --become --inventory "192.168.33.13," --module-name "ansible.builtin.lineinfile" --args "path='/etc/hosts' regexp='^127.0.0.1' line='127.0.0.1 localhost master master.local'" all
+      ansible --become --inventory "192.168.33.13,192.168.33.14,192.168.33.15," --module-name "ansible.builtin.lineinfile" --args "path='/etc/hosts' regexp='^127.0.2.1' state='absent'" all
+      ansible --become --inventory "192.168.33.13,192.168.33.14,192.168.33.15," --module-name "ansible.builtin.lineinfile" --args "path='/etc/hosts' regexp='^127.0.1.1' state='absent'" all
       ansible --become --inventory "192.168.33.13,192.168.33.14,192.168.33.15," --module-name "ansible.builtin.lineinfile" --args "path='/etc/systemd/resolved.conf' regexp='^#DNS=' line='DNS=8.8.8.8'" all
       ansible --become --inventory "192.168.33.13,192.168.33.14,192.168.33.15," --module-name "ansible.builtin.lineinfile" --args "path='/etc/hosts' regexp='^192.168.33.13' line='192.168.33.13 master'" all
       ansible --become --inventory "192.168.33.13,192.168.33.14,192.168.33.15," --module-name "ansible.builtin.lineinfile" --args "path='/etc/hosts' regexp='^192.168.33.14' line='192.168.33.14 worker-14'" all
